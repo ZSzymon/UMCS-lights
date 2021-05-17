@@ -1,6 +1,12 @@
 version: '3.8'
 
 services:
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - backend
   emulate:
     build:
       context: .
@@ -27,9 +33,12 @@ services:
       - backend
   backend:
     build: ./backend
-    command: ["./wait-for-it.sh", "database:5432", "--", "gunicorn", "lights.wsgi:application",  "--bind", "0.0.0.0:8000"]
-    ports:
-      - 58894:8000
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    expose:
+      - 8000
     env_file:
       - ./backend/.env.dev
     depends_on:
