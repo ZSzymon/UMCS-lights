@@ -200,3 +200,14 @@ def test_get_codes_list_big_number_of_codes(client):
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == number_of_approved_codes
 
+
+@pytest.mark.django_db
+def test_generated_error_true_codes(client):
+    test_code = factories.CodeFactory.create(generated_error=True)
+
+    url = reverse('codes-list')
+    response = client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert test_code.generated_error == True
+
